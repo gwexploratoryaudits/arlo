@@ -17,6 +17,25 @@ def election_settings(client: FlaskClient, election_id: str):
     assert_ok(rv)
 
 
+def test_offline_results_empty(
+    client: FlaskClient,
+    election_id: str,
+    jurisdiction_ids: List[str],
+    contest_ids: List[str],
+    round_1_id: str,
+):
+    set_logged_in_user(client, UserType.JURISDICTION_ADMIN, DEFAULT_JA_EMAIL)
+    contests = Contest.query.filter(Contest.id.in_(contest_ids)).all()
+    rv = client.get(
+        f"/api/election/{election_id}/jurisdiction/{jurisdiction_ids[0]}/round/{round_1_id}/results",
+    )
+    assert rv.status_code == 200
+    assert json.loads(rv.data) == {
+        contest.id: {choice.id: None for choice in contest.choices}
+        for contest in contests
+    }
+
+
 def test_run_offline_audit(
     client: FlaskClient,
     election_id: str,
@@ -67,6 +86,12 @@ def test_run_offline_audit(
     )
     assert_ok(rv)
 
+    rv = client.get(
+        f"/api/election/{election_id}/jurisdiction/{jurisdiction_ids[0]}/round/{round_id}/results",
+    )
+    assert rv.status_code == 200
+    assert json.loads(rv.data) == jurisdiction_1_results
+
     # Round shouldn't be over yet, since we haven't recorded results for all jurisdictions with sampled ballots
     rv = client.get(f"/api/election/{election_id}/round")
     rounds = json.loads(rv.data)["rounds"]
@@ -96,6 +121,12 @@ def test_run_offline_audit(
         jurisdiction_2_results,
     )
     assert_ok(rv)
+
+    rv = client.get(
+        f"/api/election/{election_id}/jurisdiction/{jurisdiction_ids[1]}/round/{round_id}/results",
+    )
+    assert rv.status_code == 200
+    assert json.loads(rv.data) == jurisdiction_2_results
 
     # Round should be over
     rv = client.get(f"/api/election/{election_id}/round")
@@ -248,6 +279,11 @@ def test_offline_results_bad_round(
         client,
         f"/api/election/{election_id}/jurisdiction/{jurisdiction_ids[0]}/round/not-a-round-id/results",
         {},
+    )
+    assert rv.status_code == 404
+
+    rv = client.get(
+        f"/api/election/{election_id}/jurisdiction/{jurisdiction_ids[0]}/round/not-a-round-id/results",
     )
     assert rv.status_code == 404
 
