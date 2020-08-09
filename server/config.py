@@ -32,6 +32,36 @@ def setup_flask_config() -> Tuple[str, bool]:
 FLASK_ENV, FLASK_DEBUG = setup_flask_config()
 
 
+def setup_logging():
+    "Use $ARLO_LOGLEVEL (an integer) if given, otherwise a default based on FLASK_ENV"
+
+    arlo_loglevel = os.environ.get("ARLO_LOGLEVEL", None)
+
+    if arlo_loglevel is None:
+        loglevel = logging.DEBUG if FLASK_ENV == "development" else logging.WARNING
+    else:
+        loglevel = int(arlo_loglevel)
+
+    return loglevel
+
+
+LOGLEVEL = setup_logging()
+logging.basicConfig(
+    format="%(asctime)s:%(name)s:%(levelname)s:%(message)s", level=LOGLEVEL
+)
+logging.debug("Test debug log")
+logging.warning(f"Arlo running at loglevel {LOGLEVEL}")
+
+
+def filter_athena_messages(record):
+    "Filter out any logging messages from athena/audit.py, in preference to our tighter logging"
+
+    return not record.pathname.endswith("athena/audit.py")
+
+
+logging.getLogger().addFilter(filter_athena_messages)
+
+
 DEVELOPMENT_DATABASE_URL = "postgresql://arlo:arlo@localhost:5432/arlo"
 TEST_DATABASE_URL = "postgresql://arlo:arlo@localhost:5432/arlotest"
 
