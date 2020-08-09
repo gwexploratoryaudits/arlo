@@ -80,8 +80,13 @@ def get_minerva_test_statistics(
     >>> get_minerva_test_statistics(0.1, 0.224472184613, 0.12237580158, 49, 37)
     0.12450655512929908
 
-    FIXME: Should this be 1.0?
+    FIXME: Should this be 1.0?  Or nothing, indicaating "None"?
     >>> get_minerva_test_statistics(0.1, 0.224472184613, 0.12237580158, 0, 0)
+    >>> get_minerva_test_statistics(0.1, 0.6, 0.4, 7, 0)
+    0.2790816472336536
+    >>> get_minerva_test_statistics(0.1, 0.6, 0.4, 13, 0)
+    0.09346387898717934
+    >>> get_bravo_test_statistics(0.1, 0.6, 0.4, 13, 0)
     """
 
     # calculate the undiluted "two-way" share of votes for the winner
@@ -144,6 +149,8 @@ def minerva_sample_sizes(
     # FIXME: check this
     >>> minerva_sample_sizes(0.1, 0.6, 0.4, 0, 0, 0.7)
     111
+    >>> minerva_sample_sizes(0.1, 0.6, 0.4, 0, 0, 0.9)
+    179
     """
 
     # calculate the undiluted "two-way" share of votes for the winner

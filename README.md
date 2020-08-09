@@ -105,6 +105,23 @@ Arlo is configured mostly through environment variables:
 
 ### Creating Organizations and Administrators
 
+# Create the organization and user that administers this Arlo instance itself
+# The email addresses used here should match the email addresses associated with tenants in auth0.
+
+org=$(python -m scripts.create-org r2b2)
+python -m scripts.create-admin $org nealmcb@gmail.com
+
+cat <<EOF
+echo The email addresses authorized to administer jurisdictions are identified
+via the filesheet.csv file uploaded by the Arlo administrator
+e.g. in /srv/s/electionaudits/arlo/arlo/neal_ignore/colorado_filesheet.
+
+Finally, after the Jurisdiction admin has created audit boards,
+to log in as an Audit Board, download the Audit Board Credentials for Data Entry
+and click on the auditboard URLs with the embedded passwordless tokens there.
+EOF
+
+
 Organizations are, for example, the State of
 Massachusetts. Administrators are individual users that administer
 audits for an organization. All authentication is done via auth0 with
