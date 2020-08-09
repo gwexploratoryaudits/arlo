@@ -12,6 +12,7 @@ import logging
 import math
 from athena.audit import Audit
 
+
 def make_election(risk_limit, p_w: float, p_r: float):
     """
     Transform fractional shares to an athena Election object.
@@ -31,17 +32,18 @@ def make_election(risk_limit, p_w: float, p_r: float):
     b = contest_ballots - a
 
     contest = {
-        'contest_ballots': contest_ballots,
-        'tally': {'A': a, 'B': b},
-        'num_winners': 1,
-        'reported_winners': ['A'],
-        'contest_type': 'PLURALITY'}
+        "contest_ballots": contest_ballots,
+        "tally": {"A": a, "B": b},
+        "num_winners": 1,
+        "reported_winners": ["A"],
+        "contest_type": "PLURALITY",
+    }
 
-    contest_name = 'ArloContest'
+    contest_name = "ArloContest"
     election = {
-        'name': "ArloElection",
-        'total_ballots': contest_ballots,
-        'contests': {contest_name: contest}
+        "name": "ArloElection",
+        "total_ballots": contest_ballots,
+        "contests": {contest_name: contest},
     }
 
     a = Audit("minerva", risk_limit)
@@ -49,6 +51,7 @@ def make_election(risk_limit, p_w: float, p_r: float):
     a.load_contest(contest_name)
 
     return a
+
 
 def get_minerva_test_statistics(
     risk_limit: float, p_w: float, p_r: float, sample_w: int, sample_r: int,
@@ -190,6 +193,7 @@ def minerva_sample_sizes(
     return size_adj
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import doctest
+
     doctest.testmod()

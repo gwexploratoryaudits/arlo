@@ -109,6 +109,16 @@ def get_test_statistics(
 
     # import pdb; pdb.set_trace()  # not in flask?  https://stackoverflow.com/questions/34914704/bdbquit-raised-when-debugging-python
 
+    for cand, votes in sample_results.items():
+        if cand in winners:
+            for loser in losers:
+                T[(cand, loser)] *= (winners[cand]["swl"][loser] / 0.5) ** votes
+        elif cand in losers:
+            for winner in winners:
+                T[(winner, cand)] *= ((1 - winners[winner]["swl"][cand]) / 0.5) ** votes
+
+    logging.debug(f'bravo test_stats: T={T}')
+
     if ALGORITHM == "minerva":
         for winner, winner_res in winners.items():
             for loser, loser_res in losers.items():
@@ -127,17 +137,10 @@ def get_test_statistics(
                 )
                 T[(winner, loser)] = 1.0 if res is None else 1.0 / res
 
+        logging.debug(f'test_stats return: T={T}')
         return T
 
     # else.....
-    for cand, votes in sample_results.items():
-        if cand in winners:
-            for loser in losers:
-                T[(cand, loser)] *= (winners[cand]["swl"][loser] / 0.5) ** votes
-        elif cand in losers:
-            for winner in winners:
-                T[(winner, cand)] *= ((1 - winners[winner]["swl"][cand]) / 0.5) ** votes
-
     return T
 
 
