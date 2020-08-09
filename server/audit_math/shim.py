@@ -10,10 +10,11 @@ Or is it better to make them up for each pairwise estimate as we go?
 
 import logging
 import math
-from athena.audit import Audit
+from typing import Any
+from athena.audit import Audit  # type: ignore
 
 
-def make_election(risk_limit, p_w: float, p_r: float):
+def make_election(risk_limit, p_w: float, p_r: float) -> Any:
     """
     Transform fractional shares to an athena Election object.
 
@@ -28,12 +29,12 @@ def make_election(risk_limit, p_w: float, p_r: float):
     p_w2 = p_w / p_wr
 
     contest_ballots = 100000
-    a = int(contest_ballots * p_w2)
-    b = contest_ballots - a
+    winner = int(contest_ballots * p_w2)
+    loser = contest_ballots - winner
 
     contest = {
         "contest_ballots": contest_ballots,
-        "tally": {"A": a, "B": b},
+        "tally": {"A": winner, "LOSER": loser},
         "num_winners": 1,
         "reported_winners": ["A"],
         "contest_type": "PLURALITY",
@@ -46,16 +47,16 @@ def make_election(risk_limit, p_w: float, p_r: float):
         "contests": {contest_name: contest},
     }
 
-    a = Audit("minerva", risk_limit)
-    a.add_election(election)
-    a.load_contest(contest_name)
+    audit = Audit("minerva", risk_limit)
+    audit.add_election(election)
+    audit.load_contest(contest_name)
 
-    return a
+    return audit
 
 
 def get_minerva_test_statistics(
     risk_limit: float, p_w: float, p_r: float, sample_w: int, sample_r: int,
-) -> (float, float):
+) -> Any:
     """
     Return Minerva p-value
     TODO: refactor to pass in integer vote shares to allow more exact calculations, incorporate or
@@ -85,37 +86,34 @@ def get_minerva_test_statistics(
 
     FIXME: Should this be 1.0?  Or nothing, indicaating "None"?
     >>> get_minerva_test_statistics(0.1, 0.224472184613, 0.12237580158, 0, 0)
-    >>> get_minerva_test_statistics(0.1, 0.6, 0.4, 7, 0)
-    0.2790816472336536
-    >>> get_minerva_test_statistics(0.1, 0.6, 0.4, 13, 0)
-    0.09346387898717934
-    >>> get_bravo_test_statistics(0.1, 0.6, 0.4, 13, 0)
+    >>> get_minerva_test_statistics(0.1, 0.75, 0.25, 7, 0)
+    0.05852766346593508
     """
 
     # calculate the undiluted "two-way" share of votes for the winner
     p_wr = p_w + p_r
     p_w2 = p_w / p_wr
 
-    a = make_election(risk_limit, p_w, p_r)
+    audit = make_election(risk_limit, p_w, p_r)
 
     if sample_w or sample_r:
         round_sizes = [sample_w + sample_r]
-        a.add_round_schedule(round_sizes)
-        a.set_observations(round_sizes[0], round_sizes[0], [sample_w, sample_r])
+        audit.add_round_schedule(round_sizes)
+        audit.set_observations(round_sizes[0], round_sizes[0], [sample_w, sample_r])
     else:
         round_sizes = []
 
     if round_sizes:
-        status = a.status[a.active_contest]
-        r = status.risks[0]
+        status = audit.status[audit.active_contest]
+        risk = status.risks[0]
     else:
-        r = None
+        risk = None
 
     logging.info(
-        f"shim get_minerva_test_statistics: margin {(p_w2 - 0.5) * 2} (pw {p_w} pr {p_r}) (sw {sample_w} sr {sample_w}) r {r}"
+        f"shim get_minerva_test_statistics: margin {(p_w2 - 0.5) * 2} (pw {p_w} pr {p_r}) (sw {sample_w} sr {sample_w}) risk {risk}"
     )
 
-    return r
+    return risk
 
 
 def minerva_sample_sizes(
@@ -160,27 +158,25 @@ def minerva_sample_sizes(
     p_wr = p_w + p_r
     p_w2 = p_w / p_wr
 
-    a = make_election(risk_limit, p_w, p_r)
+    audit = make_election(risk_limit, p_w, p_r)
 
     pstop_goal = [p_completion]
 
     if sample_w or sample_r:
         round_sizes = [sample_w + sample_r]
-        a.add_round_schedule(round_sizes)
-        a.set_observations(round_sizes[0], round_sizes[0], [sample_w, sample_r])
+        audit.add_round_schedule(round_sizes)
+        audit.set_observations(round_sizes[0], round_sizes[0], [sample_w, sample_r])
     else:
         round_sizes = []
 
     if round_sizes:
-        status = a.status[a.active_contest]
-        r = status.risks[0]
+        status = audit.status[audit.active_contest]
         below_kmin = status.min_kmins[0] - sample_w
     else:
-        r = None
         below_kmin = 0
 
-    x = a.find_next_round_size(pstop_goal)
-    next_round_size_0 = x["future_round_sizes"][0]
+    res = audit.find_next_round_size(pstop_goal)
+    next_round_size_0 = res["future_round_sizes"][0]
 
     next_round_size = next_round_size_0 + 2 * below_kmin
 
