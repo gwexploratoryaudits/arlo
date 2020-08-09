@@ -92,6 +92,9 @@ Like any open-source software, Arlo welcomes suggested changes in the form of pu
 
 Before submitting a pull request, please review our [Contribution Guidelines](./docs/contribution-guidelines.md).
 
+### Warnings
+Beware: if you run make format-server, it will run black in a way which changes all files under the current directory without providing a backup (?)
+
 ### Configuration
 
 Arlo is configured mostly through environment variables:
