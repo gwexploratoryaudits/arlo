@@ -37,6 +37,7 @@ uuid = "*"
 xkcdpass = "*"
 sqlalchemy = "*"
 typing-extensions = "*"
+athena = {editable = true,git = "https://github.com/filipzz/athena.git"}
 
 [requires]
 python_version = "3.7"
