@@ -68,6 +68,7 @@ TEST_DATABASE_URL = "postgresql://arlo:arlo@localhost:5432/arlotest"
 
 def read_database_url_config() -> str:
     environment_database_url = os.environ.get("DATABASE_URL", None)
+    logging.warning(f"environment_database_url = {environment_database_url}")
     if environment_database_url:
         return environment_database_url
 
@@ -108,6 +109,11 @@ SESSION_SECRET = read_session_secret()
 
 def read_http_origin() -> str:
     http_origin = os.environ.get("ARLO_HTTP_ORIGIN", None)
+
+    logging.warning(f"ARLO_HTTP_ORIGIN={http_origin}")
+    logging.warning(
+        f"FLASK_ENV={FLASK_ENV}, HEROKKU_APP_NAME={os.environ.get('HEROKU_APP_NAME')}"
+    )
 
     if not http_origin:
         if FLASK_ENV in DEVELOPMENT_ENVS:
