@@ -112,7 +112,7 @@ def read_http_origin() -> str:
 
     logging.warning(f"ARLO_HTTP_ORIGIN={http_origin}")
     logging.warning(
-        f"FLASK_ENV={FLASK_ENV}, HEROKKU_APP_NAME={os.environ.get('HEROKU_APP_NAME')}"
+        f"FLASK_ENV={FLASK_ENV}, HEROKU_APP_NAME={os.environ.get('HEROKU_APP_NAME')}"
     )
 
     if not http_origin:
