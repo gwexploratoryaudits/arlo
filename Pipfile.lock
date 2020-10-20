@@ -22,6 +22,7 @@
             ],
             "index": "pypi",
             "version": "==1.4.2"
+	},
         "athena": {
             "editable": true,
             "git": "https://github.com/filipzz/athena.git",
