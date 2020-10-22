@@ -183,7 +183,7 @@ def minerva_sample_sizes(
     size_adj = math.ceil(next_round_size / p_wr)
 
     logging.info(
-        f"shim sample sizes: margin {(p_w2 - 0.5) * 2} (pw {p_w} pr {p_r}) (sw {sample_w} sr {sample_w}) pstop {p_completion} below_kmin {below_kmin} raw {next_round_size} scaled {size_adj}"
+        f"shim sample sizes: margin {(p_w2 - 0.5) * 2} (pw {p_w} pr {p_r}) (sw {sample_w} sr {sample_r}) pstop {p_completion} below_kmin {below_kmin} raw {next_round_size} scaled {size_adj}"
     )
 
     return size_adj
